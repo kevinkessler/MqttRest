@@ -1,0 +1,144 @@
+swagger: "2.0"
+info:
+  description: "API to access Garage Door functionality"
+  version: "1.0.0"
+  title: "Resful Garage Door"
+host: "garage-server.local"
+basePath: "/v1"
+tags:
+- name: "door"
+  description: "Garage Door Functinoality"
+- name: "light"
+  description: "Garage Light Functionality"
+schemes:
+- "http"
+paths:
+  /door:
+    get:
+      tags:
+      - "door"
+      summary: "Returns the current state of the door"
+      description: "Returns the current state of the door.  One of OPEN, CLOSED, OPENING, or CLOSING"
+      operationId: "getDoor"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/DoorState"
+        500:
+          description: "Error Occured"
+          schema:
+            $ref: "#/definitions/ErrorState"
+    post:
+      tags:
+        - "door"
+      summary: "Controls the garage door"
+      description: "Sends the garage door OPEN and CLOSE commands"
+      operationId: "postDoor"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Command to send to the garage door"
+        required: true
+        schema:
+          $ref: "#/definitions/DoorCommand"
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/DoorState"
+        500:
+          description: "MQTT Error Occured"
+          schema:
+            $ref: "#/definitions/ErrorState"
+  /light:
+    get:
+      tags:
+      - "light"
+      summary: "Returns the current light level"
+      description: "Returns the current illumination level in the garage in Lux"
+      operationId: "getLight"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/LightState"
+        500:
+          description: "Error Occured"
+          schema:
+            $ref: "#/definitions/ErrorState"
+    post:
+      tags:
+        - "light"
+      summary: "Controls the garage light"
+      description: "Toggle the garage light in state"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Operation Successful"
+          schema:
+            $ref: "#/definitions/LightState"
+        500:
+          description: "MQTT Error Occured"
+          schema:
+            $ref: "#/definitions/ErrorState"
+
+definitions:
+  DoorState:
+    type: "object"
+    properties:
+      state:
+        type: "string"
+        description: "Door State"
+        enum:
+        - "OPEN"
+        - "CLOSED"
+        - "OPENING"
+        - "CLOSING"
+      temperature:
+        description: "Current Temperature of the Garage"
+        type: "number"
+        format: "float"
+  DoorCommand:
+    type: "object"
+    properties:
+      command:
+        type: "string"
+        description: "Door Command"
+        enum:
+          - "OPEN"
+          - "CLOSE"
+  LightState:
+    type: "object"
+    properties:
+      lux:
+        type: "number"
+        description: "Current illumination of Garage in LUX"
+        format: "float"
+  ErrorState:
+    type: "object"
+    properties:
+      errorCode:
+        description: "Error Code of error message"
+        type: "string"
+      errorMessage:
+        description: "Textual error message"
+        type: "string"
